@@ -41,4 +41,10 @@ class Grafo:
         pass
 
     def __str__(self):
-        pass
+        linhas = []
+        for u in self.adj:              # ← percorre cada vértice
+            textos = []                 # ← zera a lista para CADA vértice
+            for v, peso in self.adj[u]:
+                textos.append(f"{v}: {peso}")
+            linhas.append(f"{u} -> " + ", ".join(textos))
+        return "\n".join(linhas)
