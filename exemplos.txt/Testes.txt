@@ -1,0 +1,14 @@
+if __name__ == "__main__":
+    g = Grafo(direcionado=False, ponderado=True)
+    g.adicionar_arestas('O', 'A', 2)
+    g.adicionar_arestas('O', 'B', 3)
+    print(g.adj)
+
+    g2 = Grafo(direcionado=True, ponderado=False)
+    g2.adicionar_arestas('O', 'A', 2)
+    print(g2.adj)
+    g3 = Grafo(ponderado=True)
+    try:
+        g3.adicionar_arestas('O', 'A')   # sem peso
+    except ValueError as e:
+        print("Erro capturado:", e)
