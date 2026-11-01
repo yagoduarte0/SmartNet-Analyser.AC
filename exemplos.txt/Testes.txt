@@ -12,3 +12,8 @@ if __name__ == "__main__":
         g3.adicionar_arestas('O', 'A')   # sem peso
     except ValueError as e:
         print("Erro capturado:", e)
+    print(g.arestas())   # 2 arestas: [('A', 'O', 2), ('B', 'O', 3)]
+    print(g2.arestas())  # 1 aresta: [('O', 'A', 1)]
+    g.limpar()
+    print(g.adj)        # deve sair {}
+    print(g.vertices()) # deve sair []

@@ -26,12 +26,18 @@ class Grafo:
         pass
 
     def vertices(self):
-        pass
+        return list(self.adj.keys())
 
     def arestas(self):
-        pass
+        lista = []
+        for u in self.adj:
+            for v, peso in self.adj[u]:
+                if self.direcionado or (u < v):
+                    lista.append((u, v, peso))
+        return lista
 
     def limpar(self):
+        self.adj.clear()
         pass
 
     def __str__(self):
