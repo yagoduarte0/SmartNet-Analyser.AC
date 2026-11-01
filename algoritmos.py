@@ -4,9 +4,11 @@ def bfs(grafo, origem):
     visitados = set()
     fila = deque()
     ordem = []
+    nivel = {}
 
     visitados.add(origem)
     fila.append(origem)
+    nivel[origem] = 0
 
     while fila:
         vertice = fila.popleft()
@@ -14,9 +16,10 @@ def bfs(grafo, origem):
         for vizinho, _ in grafo.adj[vertice]:
             if vizinho not in visitados:
                 visitados.add(vizinho)
+                nivel[vizinho] = nivel[vertice] + 1
                 fila.append(vizinho)
 
-    return ordem
+    return ordem, nivel
 
 if __name__ == "__main__":
     from grafo import Grafo
