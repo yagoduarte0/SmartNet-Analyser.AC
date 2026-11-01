@@ -59,6 +59,17 @@ def dijkstra(grafo, origem):
                 heapq.heappush(heap, (nova_distancia, vizinho))
     return distancia, pai
 
+def reconstruir_caminho(pai, destino):
+    caminho = []
+    atual = destino
+
+    while atual is not None:
+        caminho.append(atual)
+        atual = pai[atual]
+
+    caminho.reverse()
+    return caminho
+
 
 if __name__ == "__main__":
     from grafo import Grafo
@@ -83,3 +94,5 @@ if __name__ == "__main__":
     dist, pai = dijkstra(g, 'O')
     print("Dijkstra distâncias:", dist)
     print("Dijkstra pais:", pai)
+
+    print("Rota até T:", reconstruir_caminho(pai, 'T'))
