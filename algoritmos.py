@@ -1,4 +1,5 @@
 from collections import deque
+import heapq
 
 def bfs(grafo, origem):
     visitados = set()
@@ -38,6 +39,26 @@ def dfs(grafo, origem):
     visitar(origem)
     return ordem, pai
 
+def dijkstra(grafo, origem):
+    distancia = {v: float('inf') for v in grafo.vertices()}
+    pai = {v: None for v in grafo.vertices()}
+    distancia[origem] = 0
+    heap = [(0, origem)]
+
+    while heap:
+        distancia_atual, vertice = heapq.heappop(heap)
+
+        if distancia_atual > distancia[vertice]:
+            continue
+
+        for vizinho, peso in grafo.adj[vertice]:
+            nova_distancia = distancia[vertice] + peso
+            if nova_distancia < distancia[vizinho]:
+                distancia[vizinho] = nova_distancia
+                pai[vizinho] = vertice
+                heapq.heappush(heap, (nova_distancia, vizinho))
+    return distancia, pai
+
 
 if __name__ == "__main__":
     from grafo import Grafo
@@ -58,3 +79,7 @@ if __name__ == "__main__":
     ordem, pai = dfs(g, 'O')
     print("DFS ordem:", ordem)
     print("DFS pais:", pai)
+
+    dist, pai = dijkstra(g, 'O')
+    print("Dijkstra distâncias:", dist)
+    print("Dijkstra pais:", pai)
