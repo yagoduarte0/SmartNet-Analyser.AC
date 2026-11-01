@@ -21,6 +21,24 @@ def bfs(grafo, origem):
 
     return ordem, nivel
 
+def dfs(grafo, origem):
+    visitados = set()
+    ordem = []
+    pai = {origem: None}
+
+    def visitar(vertice):
+        visitados.add(vertice)
+        ordem.append(vertice)
+
+        for vizinho, _ in grafo.adj[vertice]:
+            if vizinho not in visitados:
+                pai[vizinho] = vertice
+                visitar(vizinho)
+
+    visitar(origem)
+    return ordem, pai
+
+
 if __name__ == "__main__":
     from grafo import Grafo
 
@@ -35,3 +53,8 @@ if __name__ == "__main__":
         g.adicionar_arestas(u, v, p)
 
     print("BFS:", bfs(g, 'O'))
+    print("BFS níveis:", bfs(g, 'O')[1])
+
+    ordem, pai = dfs(g, 'O')
+    print("DFS ordem:", ordem)
+    print("DFS pais:", pai)

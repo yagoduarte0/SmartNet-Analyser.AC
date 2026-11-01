@@ -37,3 +37,8 @@ if __name__ == "__main__":
         g.adicionar_arestas(u, v, p)
 
     print("BFS:", bfs(g, 'O'))
+    print("BFS níveis:", bfs(g, 'O')[1])
+
+    ordem, pai = dfs(g, 'O')
+    print("DFS ordem:", ordem)
+    print("DFS pais:", pai)
