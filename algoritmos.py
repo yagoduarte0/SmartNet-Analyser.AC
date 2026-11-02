@@ -59,6 +59,28 @@ def dijkstra(grafo, origem):
                 heapq.heappush(heap, (nova_distancia, vizinho))
     return distancia, pai
 
+def kruskal(grafo):
+    pai = {v: v for v in grafo.vertices()}
+
+    def find(x):
+        if x != pai[x]:
+            pai[x] = find(pai[x])
+        return pai[x]
+
+    mst = []
+    custo = 0
+    arestas_ordenadas = sorted(grafo.arestas(), key=lambda x: x[2])
+
+    for u, v, p in arestas_ordenadas:
+        raiz_u = find(u)
+        raiz_v = find(v)
+        if raiz_u != raiz_v:
+            pai[raiz_u] = raiz_v
+            mst.append((u, v, p))
+            custo += p
+
+    return mst, custo
+
 def reconstruir_caminho(pai, destino):
     caminho = []
     atual = destino
@@ -96,3 +118,7 @@ if __name__ == "__main__":
     print("Dijkstra pais:", pai)
 
     print("Rota até T:", reconstruir_caminho(pai, 'T'))
+
+    mst, custo = kruskal(g)
+    print("Árvore geradora mínima (Kruskal):", mst)
+    print("Custo total (Kruskal):", custo)
