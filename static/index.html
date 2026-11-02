@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartNet Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/vendor/leaflet.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 fill=%22%230a0a0a%22/><text x=%2216%22 y=%2222%22 font-family=%22Arial Black%22 font-size=%2214%22 fill=%22%23efece4%22 text-anchor=%22middle%22>SN</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">SN</div>
+    <div>
+      <h1>SmartNet Analyzer</h1>
+      <p>Infraestrutura de cidades inteligentes / conectividade + roteamento</p>
+    </div>
+  </div>
+
+  <div class="mode-switch" role="tablist">
+    <button class="mode active" data-modo="grafo">Grafo</button>
+    <button class="mode" data-modo="mapa">Mapa</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="st-v">0</b><span>vértices</span></div>
+    <div class="stat"><b id="st-e">0</b><span>arestas</span></div>
+    <div class="stat" id="st-conexo-box"><b id="st-conexo">—</b><span>conexo</span></div>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ═════════════ ENTRADA ═════════════ -->
+  <aside class="panel sidebar">
+    <section>
+      <h2><span class="n">01</span>Tipo do grafo</h2>
+      <label class="toggle"><input type="checkbox" id="chk-dir"><span class="box-check"></span>Direcionado <small>mão única</small></label>
+      <label class="toggle"><input type="checkbox" id="chk-pond" checked><span class="box-check"></span>Ponderado <small>custos</small></label>
+      <p class="hint" id="lock-hint" hidden>Travado: limpe o grafo para trocar o tipo.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">02</span>Nova conexão</h2>
+      <form id="form-aresta" autocomplete="off">
+        <div class="row">
+          <input id="in-u" placeholder="origem" list="lista-vertices" required>
+          <span class="arrow" id="seta-form">—</span>
+          <input id="in-v" placeholder="destino" list="lista-vertices">
+        </div>
+        <div class="row">
+          <input id="in-peso" type="number" min="0" step="any" placeholder="peso">
+          <button class="btn primary" type="submit">Adicionar</button>
+        </div>
+        <p class="hint">Sem destino = vértice isolado.</p>
+      </form>
+      <datalist id="lista-vertices"></datalist>
+    </section>
+
+    <section>
+      <h2><span class="n">03</span>Lote / arquivo</h2>
+      <textarea id="in-lote" rows="5" spellcheck="false" placeholder="O A 2&#10;O B 5&#10;A B 2&#10;...&#10;&#10;1ª linha opcional:&#10;DIRECIONADO PONDERADO"></textarea>
+      <div class="row">
+        <button class="btn" id="btn-lote">Carregar</button>
+        <label class="btn file">Abrir .txt<input type="file" id="in-arquivo" accept=".txt" hidden></label>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="n">04</span>Cenários</h2>
+      <div class="presets">
+        <button class="preset" data-preset="prova"><span class="idx">A</span><b>Grafo da prova</b><small>8 vértices / 14 arestas</small></button>
+        <button class="preset" data-preset="rio"><span class="idx">B</span><b>Bairros do Rio</b><small>mapa / distância real</small></button>
+        <button class="preset" data-preset="mundo"><span class="idx">C</span><b>Capitais do mundo</b><small>mapa / rede global</small></button>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button class="btn" id="btn-limpar">Limpar grafo</button>
+      <button class="btn danger" id="btn-finalizar">Finalizar aplicação</button>
+    </section>
+  </aside>
+
+  <!-- ═════════════ PALCO ═════════════ -->
+  <section class="stage">
+    <div class="panel canvas-wrap" id="canvas-wrap" data-label="vista: grafo">
+      <div id="rede" class="canvas"></div>
+      <div id="mapa" class="canvas" hidden></div>
+      <div class="map-tools" id="map-tools" hidden>
+        <button class="chip" id="tool-add">+ Ponto</button>
+        <button class="chip" id="tool-ligar">Ligar</button>
+        <span class="map-hint" id="map-hint">Selecione uma ferramenta.</span>
+      </div>
+      <div class="empty" id="empty">
+        <p>Sem grafo</p>
+        <small>Adicione conexões, cole um texto ou carregue um cenário.</small>
+      </div>
+      <div class="legend" id="legend" hidden></div>
+    </div>
+
+    <div class="panel algos">
+      <div class="algo-head">
+        <label>Origem
+          <select id="sel-origem"></select>
+        </label>
+        <div class="algo-buttons">
+          <button class="algo" data-algo="dfs"><span class="idx">01</span><b>DFS</b><small>auditoria de rotas</small></button>
+          <button class="algo" data-algo="bfs"><span class="idx">02</span><b>BFS</b><small>alerta em ondas</small></button>
+          <button class="algo" data-algo="dijkstra"><span class="idx">03</span><b>Dijkstra</b><small>rota de emergência</small></button>
+          <button class="algo" data-algo="kruskal"><span class="idx">04</span><b>Kruskal</b><small>rede de fibra</small></button>
+        </div>
+      </div>
+      <div id="resultado" class="resultado">
+        <p class="muted">Escolha a origem e execute um algoritmo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ MEMÓRIA ═════════════ -->
+  <aside class="panel memoria">
+    <h2><span class="n">05</span>Memória</h2>
+    <p class="hint">Lista de adjacência real do Python: <code>self.adj</code> = dict de listas de <code>(vizinho, peso)</code>. Clique num item para remover a aresta.</p>
+    <div id="mem-lista" class="mem-lista"></div>
+    <details>
+      <summary>Saída de __str__()</summary>
+      <pre id="mem-str"></pre>
+    </details>
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="overlay-box">
+    <h2>Aplicação finalizada</h2>
+    <p>O servidor foi encerrado. Pode fechar esta aba.</p>
+  </div>
+</div>
+
+<script src="/static/vendor/leaflet.js"></script>
+<script src="/static/vendor/vis-network.min.js"></script>
+<script src="/static/cenarios.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
